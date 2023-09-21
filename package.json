@@ -1,0 +1,12 @@
+{
+  "name": "angular-graphql",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "front": "(cd checkin && ng serve --disable-host-check);",
+    "back": "(cd server && npm run start);"
+  },
+  "author": "",
+  "license": "ISC"
+}
