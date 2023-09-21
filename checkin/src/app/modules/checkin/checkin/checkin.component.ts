@@ -1,10 +1,11 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnDestroy, OnInit, inject } from '@angular/core';
 
 import { FormBuilder, Validators } from '@angular/forms';
 import { DoCheckInGQL,DoCheckInMutation,Response } from '../../graphql/services/generated';
-import { catchError, of } from 'rxjs';
+import { Observable, Subscription, catchError, of } from 'rxjs';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MutationResult } from 'apollo-angular';
+import { HttpErrorResponse } from '@angular/common/http';
 
 
 @Component({
@@ -12,34 +13,39 @@ import { MutationResult } from 'apollo-angular';
   templateUrl: './checkin.component.html',
   styleUrls: ['./checkin.component.scss']
 })
-export class CheckinComponent implements OnInit{
+export class CheckinComponent implements OnDestroy{
   private fb = inject(FormBuilder);
   checkinForm = this.fb.group({
    
-    familyName: ['gupta', [Validators.required, Validators.pattern("^[a-zA-Z]*$"),Validators.maxLength(15)]],
-    bookingCode: ['k12345', [Validators.required,Validators.pattern("^[a-zA-Z0-9]*$"),Validators.minLength(6),Validators.maxLength(6)]]
+    familyName: [null, [Validators.required, Validators.pattern("^[a-zA-Z]*$"),Validators.maxLength(15)]],
+    bookingCode: [null, [Validators.required,Validators.pattern("^[a-zA-Z0-9]*$"),Validators.minLength(6),Validators.maxLength(6)]]
   });
+  doCheckInSubscription: Subscription | undefined;
 
   constructor(private doCheckInGQL: DoCheckInGQL,private _snackBar: MatSnackBar){
 
   }
-
-  ngOnInit(): void {
-      
-  }
-  doCheckIn(): void {
-    this.doCheckInGQL.mutate({bookingCode:this.checkinForm.get("bookingCode")?.value!,fname:this.checkinForm.get("familyName")?.value!})
+  
+   doCheckIn(): void {
+    this.doCheckInSubscription  = this.doCheckInGQL.mutate({bookingCode:this.checkinForm.get("bookingCode")?.value!,fname:this.checkinForm.get("familyName")?.value!})
     .pipe(
-      catchError((err:any)=>{
-        console.log(err);
-        this.openSnackBarError(err.networkError?.error.errors[0].message,'close');
+      catchError(err=>{
+      
+        if(err.networkError instanceof HttpErrorResponse && err.networkError.status === 400){
+          this.openSnackBarError(err.networkError.error.errors[0].message,'close');
+        }
+        if(err.networkError.status === 401){
+          this.openSnackBarError('You are not authorized to perform this action','close');
+        }
+        if(err.networkError.status === 500){
+          this.openSnackBarError('There is some problem. Please try again.','close');
+        }
         throw err;
       })
-    )
-    .subscribe((result: MutationResult<DoCheckInMutation>)=>{ 
-
-     this.openSnackBarSuccess(result.data?.doCheckin?.message!,'close');
-    });
+    ).subscribe((result: MutationResult<DoCheckInMutation>)=>{ 
+      this.openSnackBarSuccess(result.data?.doCheckin?.message!,'close');
+     });
+   
   }
   openSnackBarError(message: string, action: string) {
     this._snackBar.open(message, action,{
@@ -53,5 +59,8 @@ export class CheckinComponent implements OnInit{
       verticalPosition:'top',
       panelClass: ['success']
     });
+  }
+  ngOnDestroy(): void {
+    this.doCheckInSubscription?.unsubscribe();
   }
 }

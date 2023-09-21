@@ -5,7 +5,7 @@
     <mat-card-content>
       <div class="row">
         <div class="col">
-          <label for="" *ngIf="checkinForm.controls['bookingCode'].valid || checkinForm.controls['bookingCode'].pristine">Booking Code*</label>
+          <label for="bookingCode" *ngIf="checkinForm.controls['bookingCode'].valid || checkinForm.controls['bookingCode'].pristine">Booking Code*</label>
           
           <mat-error *ngIf="checkinForm.controls['bookingCode'].hasError('required') && checkinForm.controls['bookingCode'].dirty">
             Booking code is <strong>required</strong>
@@ -17,14 +17,14 @@
             Booking code must be 6 characters
           </mat-error>
           <mat-form-field class="full-width">
-            <input matInput placeholder="Booking Code" formControlName="bookingCode">
-            
+            <input matInput placeholder="Booking Code" formControlName="bookingCode" name="bookingCode">
+            <mat-icon matSuffix aria-hidden="true">person</mat-icon>
           </mat-form-field>
         </div>
       </div>
       <div class="row">
         <div class="col">
-          <label for="" *ngIf="checkinForm.controls['familyName'].valid || checkinForm.controls['familyName'].pristine">Family Name*</label>
+          <label for="familyName" *ngIf="checkinForm.controls['familyName'].valid || checkinForm.controls['familyName'].pristine">Family Name*</label>
           <mat-error *ngIf="checkinForm.controls['familyName'].hasError('required')&& checkinForm.controls['familyName'].dirty">
             Family name is <strong>required</strong>
           </mat-error>
@@ -36,8 +36,8 @@
           </mat-error>
           <mat-form-field class="full-width">
             
-            <input matInput placeholder="Family name" formControlName="familyName">
-            
+            <input matInput placeholder="Family name" formControlName="familyName" name="familyName">
+            <mat-icon matSuffix aria-hidden="true">flight_takeoff</mat-icon>
            
           </mat-form-field>
         </div>
