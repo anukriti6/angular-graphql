@@ -8,6 +8,7 @@ import { MatRadioModule } from '@angular/material/radio';
 import { MatCardModule } from '@angular/material/card';
 import { ReactiveFormsModule } from '@angular/forms';
 import { Routes,RouterModule } from '@angular/router';
+import {MatSnackBarModule} from '@angular/material/snack-bar';
 
 const routes: Routes = [{
   path:'',
@@ -26,6 +27,7 @@ const routes: Routes = [{
     MatSelectModule,
     MatRadioModule,
     MatCardModule,
+    MatSnackBarModule,
     ReactiveFormsModule,
     RouterModule.forChild(routes)
   ],
@@ -34,6 +36,7 @@ const routes: Routes = [{
     MatSelectModule,
     MatRadioModule,
     MatCardModule,
+    MatSnackBarModule,
     ReactiveFormsModule]
 })
 export class CheckinModule { }

@@ -1,7 +1,10 @@
 import { Component, OnInit, inject } from '@angular/core';
 
 import { FormBuilder, Validators } from '@angular/forms';
-import { Apollo, gql } from 'apollo-angular';
+import { DoCheckInGQL,DoCheckInMutation,Response } from '../../graphql/services/generated';
+import { catchError, of } from 'rxjs';
+import { MatSnackBar } from '@angular/material/snack-bar';
+import { MutationResult } from 'apollo-angular';
 
 
 @Component({
@@ -11,46 +14,44 @@ import { Apollo, gql } from 'apollo-angular';
 })
 export class CheckinComponent implements OnInit{
   private fb = inject(FormBuilder);
-  addressForm = this.fb.group({
-    company: null,
-    firstName: [null, Validators.required],
-    lastName: [null, Validators.required],
-    address: [null, Validators.required],
-    address2: null,
-    city: [null, Validators.required],
-    state: [null, Validators.required],
-    postalCode: [null, Validators.compose([
-      Validators.required, Validators.minLength(5), Validators.maxLength(5)])
-    ],
-    shipping: ['free', Validators.required]
+  checkinForm = this.fb.group({
+   
+    familyName: ['gupta', [Validators.required, Validators.pattern("^[a-zA-Z]*$"),Validators.maxLength(15)]],
+    bookingCode: ['k12345', [Validators.required,Validators.pattern("^[a-zA-Z0-9]*$"),Validators.minLength(6),Validators.maxLength(6)]]
   });
 
-  hasUnitNumber = false;
-
-  states = [
-
-    {name: 'Wyoming', abbreviation: 'WY'}
-  ];
-  constructor(private apollo:Apollo){
+  constructor(private doCheckInGQL: DoCheckInGQL,private _snackBar: MatSnackBar){
 
   }
 
   ngOnInit(): void {
-      this.apollo.watchQuery(
-        {
-          query:gql`{
-            books {
-              author
-              id
-              title
-            }
-          }`
-        }
-      ).valueChanges.subscribe(result=>{
-        console.log('result arrived',result);
-      })
+      
   }
-  onSubmit(): void {
-    alert('Thanks!');
+  doCheckIn(): void {
+    this.doCheckInGQL.mutate({bookingCode:this.checkinForm.get("bookingCode")?.value!,fname:this.checkinForm.get("familyName")?.value!})
+    .pipe(
+      catchError((err:any)=>{
+        console.log(err);
+        this.openSnackBarError(err.networkError?.error.errors[0].message,'close');
+        throw err;
+      })
+    )
+    .subscribe((result: MutationResult<DoCheckInMutation>)=>{ 
+
+     this.openSnackBarSuccess(result.data?.doCheckin?.message!,'close');
+    });
+  }
+  openSnackBarError(message: string, action: string) {
+    this._snackBar.open(message, action,{
+      verticalPosition:'top',
+      panelClass: ['error']
+    });
+  }
+
+  openSnackBarSuccess(message: string, action: string) {
+    this._snackBar.open(message, action,{
+      verticalPosition:'top',
+      panelClass: ['success']
+    });
   }
 }

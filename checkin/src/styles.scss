@@ -37,3 +37,19 @@ $checkin-theme: mat.define-light-theme((
 
 html, body { height: 100%; }
 body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
+
+.mat-mdc-snack-bar-container {
+  &.error {
+    --mdc-snackbar-container-color: rgb(255, 208, 215);
+    --mat-mdc-snack-bar-button-color: red;
+    --mdc-snackbar-supporting-text-color: red;
+  }
+}
+  .mat-mdc-snack-bar-container {
+    &.success {
+      --mdc-snackbar-container-color: lightgreen;
+      --mat-mdc-snack-bar-button-color: #fff;
+      --mdc-snackbar-supporting-text-color: #fff;
+    }
+}
+

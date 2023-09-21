@@ -1,0 +1,38 @@
+
+enum CheckinWindow{
+    PRE
+    OPEN
+    CLOSED
+  } 
+  type Response {
+    checkin: Checkin
+    message: String
+  }
+  type Checkin {
+    bookingCode: String
+    fName: String
+    checkinStatus:Boolean
+    checkinWindow: CheckinWindow
+
+  }
+  type Query {
+    checkin: [Checkin]
+  }
+  type Mutation {
+   
+    doCheckin(bookingCode:String!, fname: String!): Response
+  }
+  
+
+mutation doCheckIn($bookingCode: String!, $fname: String!){
+  doCheckin(bookingCode: $bookingCode, fname: $fname) {
+   checkin {
+      bookingCode
+    checkinStatus
+    checkinWindow
+    fName
+   }
+   message
+  }
+  
+}
