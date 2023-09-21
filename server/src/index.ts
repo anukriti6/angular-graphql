@@ -5,44 +5,60 @@ import express from 'express';
 import http from 'http';
 import cors from 'cors';
 import bodyParser from 'body-parser';
+import { GraphQLError } from 'graphql';
 // A schema is a collection of type definitions (hence "typeDefs")
 // that together define the "shape" of queries that are executed against
 // your data.
 const typeDefs = `#graphql
-  # Comments in GraphQL strings (such as this one) start with the hash (#) symbol.
+  enum CheckinWindow{
+    PRE
+    OPEN
+    CLOSED
+  } 
 
-  # This "Book" type defines the queryable fields for every book in our data source.
-  type Book {
-    title: String
-    author: String
-    id:String
+  type Checkin {
+    bookingCode: String
+    fName: String
+    checkinStatus:Boolean
+    checkinWindow: CheckinWindow
+
   }
-
-  # The "Query" type is special: it lists all of the available queries that
-  # clients can execute, along with the return type for each. In this
-  # case, the "books" query returns an array of zero or more Books (defined above).
   type Query {
-    books: [Book]
+    checkin: [Checkin]
   }
   type Mutation {
    
-    updateBook(id:String, author: String): Book
+    doCheckin(bookingCode:String!, fname: String!): Checkin
   }
 `;
 
 
 
-const books = [
+const bookings = [
     {
-      title: 'The Awakening',
-      author: 'Kate Chopin',
-      id:'1'
+      bookingCode: 'K12345',
+      fName: 'Gupta',
+      checkinStatus:true,
+      checkinWindow:"CLOSED"
     },
     {
-      title: 'City of Glass',
-      author: 'Paul Auster',
-      id:'2'
+      bookingCode: 'K23456',
+      fName: 'Singh',
+      checkinStatus:false,
+      checkinWindow:"PRE"
     },
+    {
+      bookingCode: 'K34567',
+      fName: 'Bankar',
+      checkinStatus:false,
+      checkinWindow:"OPEN"
+    },
+    {
+      bookingCode: 'K45678',
+      fName: 'JOHN',
+      checkinStatus:false,
+      checkinWindow:"CLOSED"
+    }
   ];
 
 
@@ -53,15 +69,25 @@ const books = [
 // This resolver retrieves books from the "books" array above.
 const resolvers = {
     Query: {
-      books: () => books,
+      checkin: () => bookings,
     },
     Mutation:{
-        updateBook: (_,{id,author})=>{
-            console.log(id,author);
-             let book = books.filter(book=>book.id===id);
-             console.log(book);
-             book[0].author =author
-             return book[0];
+        doCheckin: (_,{bookingCode,fname})=>{
+            console.log(bookingCode,fname);
+            if(bookingCode==='NA'){
+              throw new GraphQLError('invalid booking code',{
+                extensions:{
+                  CODE:'9001',
+                  http:{
+                    status:400
+                  }
+                },
+              })
+            }
+             let booking = bookings.filter(booking=>booking.bookingCode===bookingCode);
+             console.log(booking);
+             booking[0].checkinStatus =true
+             return booking[0];
         }
     }
   };
